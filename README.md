@@ -43,8 +43,9 @@ vectorized_seqs = [[word_to_index[tok] for tok in seq]for seq in seqs]
 ```python
 embed = Embedding(len(vocab), 4) # embedding_dim = 4
 lstm = LSTM(input_size=4, hidden_size=5, batch_first=True) # input_dim = 4, hidden_dim = 5
+
 # print the embedding matrix (vocab_size X embedding_dim): 
-# print(next(lstm.parameters()))
+print(next(embed.parameters()))
 # Parameter containing:
 #                        [[ 0.2691206  -0.43435425  0.87935454 -2.2269666 ],    <pad>
 #                         [-1.6334635  -0.6100042   1.7509955  -1.931793  ],     _
