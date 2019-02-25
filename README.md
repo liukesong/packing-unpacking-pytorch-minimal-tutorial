@@ -48,8 +48,8 @@ lstm = LSTM(input_size=4, hidden_size=5, batch_first=True) # input_dim = 4, hidd
 ```python
 vectorized_seqs.sort(key=len, reverse=True)
 # vectorized_seqs => [[6, 9, 8, 4, 1, 11, 12, 10],
-                      [7, 3, 2, 5, 13, 7], 
-                      [12, 5, 8, 14]]
+#                     [7, 3, 2, 5, 13, 7], 
+#                     [12, 5, 8, 14]]
 seq_lengths = [len(x) for x in vectorized_seqs]
 # seq_lengths => [8, 6, 4]
 ```
