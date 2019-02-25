@@ -28,11 +28,12 @@ seqs = ['long_str',  # len = 8
 # make sure <pad> idx is 0
 vocab = ['<pad>'] + sorted(set([char for seq in seqs for char in seq]))
 # => ['<pad>', '_', 'd', 'e', 'g', 'i', 'l', 'm', 'n', 'o', 'r', 's', 't', 'u', 'y']
+word_to_index = {w:i for i, w in enumerate(vocab)}
 ```
 
 ### Step 2: Load indexed data (list of instances, where each instance is list of character indices)
 ```python
-vectorized_seqs = [[vocab.index(tok) for tok in seq]for seq in seqs]
+vectorized_seqs = [[word_to_index[tok] for tok in seq]for seq in seqs]
 # vectorized_seqs => [[6, 9, 8, 4, 1, 11, 12, 10],
 #                     [12, 5, 8, 14],
 #                     [7, 3, 2, 5, 13, 7]]
@@ -42,6 +43,25 @@ vectorized_seqs = [[vocab.index(tok) for tok in seq]for seq in seqs]
 ```python
 embed = Embedding(len(vocab), 4) # embedding_dim = 4
 lstm = LSTM(input_size=4, hidden_size=5, batch_first=True) # input_dim = 4, hidden_dim = 5
+# print the embedding matrix (vocab_size X embedding_dim): 
+# print(next(lstm.parameters()))
+# Parameter containing:
+#                        [[ 0.2691206  -0.43435425  0.87935454 -2.2269666 ],    <pad>
+#                         [-1.6334635  -0.6100042   1.7509955  -1.931793  ],     _
+#                         [ 0.48159844 -1.4886451   0.92639893  0.76906884],     d
+#                         [-0.7303265  -0.857339    0.58913064 -1.1068314 ],     e
+#                         [ 0.40524676  0.98665565 -0.08621677 -1.1728264 ],     g
+#                         [ 0.27616557 -1.224429   -1.342848   -0.7495876 ],     i
+#                         [-0.77578706 -1.8080667  -1.1168439   1.1059115 ],     l
+#                         [ 0.16031227 -0.08209462 -0.16297023  0.48121014],     m
+#                         [-0.6000342   1.1732816   0.19938554 -1.5976517 ],     n
+#                         [-0.23622951  2.0361056   0.15435742 -0.04513785],     o
+#                         [-0.22739866 -0.45782727 -0.6643252   0.25129375],     r
+#                         [-0.6470658  -0.6266589  -1.7463604   1.2675372 ],     s
+#                         [ 0.64004815  0.45813003  0.3476034  -0.03451729],     t
+#                         [ 0.01795524 -0.59048957 -0.53800726 -0.6611691 ],     u
+#                         [-1.284392    0.68294704  1.4064184  -0.42879772]]     y
+#                        
 ```
 
 ### Step 4: Sort instances by sequence length in descending order
@@ -60,8 +80,8 @@ seq_lengths = [len(x) for x in vectorized_seqs]
 seq_tensor = [torch.LongTensor(x) for x in vectorized_seqs]
 seq_tensor = torch.nn.utils.rnn.pad_sequence(seq_tensor,batch_first=True)
 # seq_tensor => [[ 6  9  8  4  1 11 12 10]          # long_str
-#                [12  5  8 14  0  0  0  0]          # tiny
 #                [ 7  3  2  5 13  7  0  0]]         # medium
+#                [12  5  8 14  0  0  0  0]          # tiny
 # seq_tensor.shape : (batch_size X max_seq_len) = (3 X 8)
 ```
 
