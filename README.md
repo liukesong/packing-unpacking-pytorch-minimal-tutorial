@@ -6,8 +6,8 @@ We want to run LSTM on a batch of 3 character sequences `['long_str', 'tiny', 'm
 -    **Step 1**: Construct Vocabulary
 -    **Step 2**: Load indexed data (list of instances, where each instance is list of character indices)
 -    **Step 3**: Make Model
--    **Step 4**: **\*** Pad instances with 0s till max length sequence
--    **Step 5**: **\*** Sort instances by sequence length in descending order
+-    **Step 4**: **\*** Sort instances by sequence length in descending order
+-    **Step 5**: **\*** Pad instances with zeros till max length sequence
 -    **Step 6**: **\*** Embed the instances
 -    **Step 7**: **\*** Call pack_padded_sequence with embeded instances and sequence lengths
 -    **Step 8**: **\*** Forward with LSTM
@@ -44,35 +44,24 @@ embed = Embedding(len(vocab), 4) # embedding_dim = 4
 lstm = LSTM(input_size=4, hidden_size=5, batch_first=True) # input_dim = 4, hidden_dim = 5
 ```
 
-
-### Step 4: Pad instances with 0s till max length sequence
+### Step 4: Sort instances by sequence length in descending order
 ```python
-# get the length of each seq in your batch
-seq_lengths = LongTensor(list(map(len, vectorized_seqs)))
-# seq_lengths => [ 8, 4,  6]
-# batch_sum_seq_len: 8 + 4 + 6 = 18
-# max_seq_len: 8
+vectorized_seqs.sort(key=len, reverse=True)
+# vectorized_seqs => [[6, 9, 8, 4, 1, 11, 12, 10],
+                      [7, 3, 2, 5, 13, 7], 
+                      [12, 5, 8, 14]]
+seq_lengths = [len(x) for x in vectorized_seqs]
+# seq_lengths => [8, 6, 4]
+```
 
-seq_tensor = Variable(torch.zeros((len(vectorized_seqs), seq_lengths.max()))).long()
-# seq_tensor => [[0 0 0 0 0 0 0 0]
-#                [0 0 0 0 0 0 0 0]
-#                [0 0 0 0 0 0 0 0]]
 
-for idx, (seq, seqlen) in enumerate(zip(vectorized_seqs, seq_lengths)):
-    seq_tensor[idx, :seqlen] = LongTensor(seq)
+### Step 5: Pad instances with zeros till max length sequence
+```python
+seq_tensor = [torch.LongTensor(x) for x in vectorized_seqs]
+seq_tensor = torch.nn.utils.rnn.pad_sequence(seq_tensor,batch_first=True)
 # seq_tensor => [[ 6  9  8  4  1 11 12 10]          # long_str
 #                [12  5  8 14  0  0  0  0]          # tiny
 #                [ 7  3  2  5 13  7  0  0]]         # medium
-# seq_tensor.shape : (batch_size X max_seq_len) = (3 X 8)
-```
-
-### Step 5: Sort instances by sequence length in descending order
-```python
-seq_lengths, perm_idx = seq_lengths.sort(0, descending=True)
-seq_tensor = seq_tensor[perm_idx]
-# seq_tensor => [[ 6  9  8  4  1 11 12 10]           # long_str
-#                [ 7  3  2  5 13  7  0  0]           # medium
-#                [12  5  8 14  0  0  0  0]]          # tiny
 # seq_tensor.shape : (batch_size X max_seq_len) = (3 X 8)
 ```
 
