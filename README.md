@@ -81,8 +81,8 @@ seq_lengths = [len(x) for x in vectorized_seqs]
 seq_tensor = [torch.LongTensor(x) for x in vectorized_seqs]
 seq_tensor = torch.nn.utils.rnn.pad_sequence(seq_tensor,batch_first=True)
 # seq_tensor => [[ 6  9  8  4  1 11 12 10]          # long_str
-#                [ 7  3  2  5 13  7  0  0]]         # medium
-#                [12  5  8 14  0  0  0  0]          # tiny
+#                [ 7  3  2  5 13  7  0  0]          # medium
+#                [12  5  8 14  0  0  0  0]]         # tiny
 # seq_tensor.shape : (batch_size X max_seq_len) = (3 X 8)
 ```
 
